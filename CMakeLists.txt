@@ -10,6 +10,7 @@ target_compile_options(compiler_options INTERFACE
 )
 
 add_subdirectory(watchdog)
+add_subdirectory(logger)
 
 add_executable(CUT src/main.c)
-target_link_libraries(CUT PRIVATE compiler_options)
+target_link_libraries(CUT PRIVATE compiler_options logger)
