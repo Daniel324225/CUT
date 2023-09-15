@@ -1,0 +1,3 @@
+add_library(utility STATIC src/utility.c)
+target_link_libraries(utility PRIVATE compiler_options)
+target_include_directories(utility PUBLIC inc)
