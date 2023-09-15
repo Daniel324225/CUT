@@ -28,7 +28,7 @@ int Logger_run(void* logger_v) {
 
     while(1) {
         Watchdog_notify_active(logger->wdi);
-        LogQueueResult result = LogQueue_pop(&logger->log_queue, &node, 1000);
+        LogQueueResult result = LogQueue_pop(&logger->log_queue, &node, 500);
         fflush(stdout);
         if (result == LOG_QUEUE_CLOSED) {
             break;
