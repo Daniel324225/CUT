@@ -13,5 +13,7 @@ typedef struct Lock {
 void Lock_init(Lock*);
 bool Lock_for_write(Lock*, long long timeout_ms);
 bool Lock_for_read(Lock*, long long timeout_ms);
+void Lock_forced(Lock*);
+void Lock_unlock_forced(Lock*);
 void Lock_unlock(Lock*);
 void Lock_destroy(Lock*);

@@ -42,9 +42,23 @@ bool Lock_for_read(Lock* lock, long long timeout_ms) {
     return success;
 }
 
+void Lock_forced(Lock* lock) {
+    mtx_lock(&lock->mutex);
+}
+
 
 void Lock_unlock(Lock* lock) {
     bool value_updated = lock->value_updated = !lock->value_updated;
+    mtx_unlock(&lock->mutex);
+    if (value_updated) {
+        cnd_signal(&lock->cv_updated);
+    } else {
+        cnd_signal(&lock->cv_updated);
+    }
+}
+
+void Lock_unlock_forced(Lock* lock) {
+    bool value_updated = lock->value_updated;
     mtx_unlock(&lock->mutex);
     if (value_updated) {
         cnd_signal(&lock->cv_updated);
