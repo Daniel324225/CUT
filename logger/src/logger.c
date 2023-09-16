@@ -1,5 +1,7 @@
-#include <stdlib.h>
+#define _GNU_SOURCE
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
 
 #include "logger.h"
 
@@ -19,8 +21,23 @@ bool Logger_log(Logger* logger, const char* msg) {
 }
 
 bool Logger_log_dynamic(Logger* logger, char* msg) {
-    return LogQueue_push(&logger->log_queue, (LogQueueNode){.dynamic_msg = msg, true}, 100) == LOG_QUEUE_SUCCESS;
+    bool ok = LogQueue_push(&logger->log_queue, (LogQueueNode){.dynamic_msg = msg, true}, 100) == LOG_QUEUE_SUCCESS;
+    if (!ok) {
+        free(msg);
+    }
+    return ok;
 }
+
+__attribute__((__format__ (__printf__, 2, 3)))
+bool Logger_log_formatted(Logger* logger, const char* format, ...) {
+    va_list ap;
+    va_start(ap, format);
+
+    char* msg;
+    vasprintf(&msg, format, ap);
+    return Logger_log_dynamic(logger, msg);
+}
+
 
 int Logger_run(void* logger_v) {
     Logger* logger = logger_v;
