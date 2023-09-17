@@ -17,6 +17,10 @@ int Reader_run(void* reader_v) {
 
     Logger_log(logger, "Reader: Waiting for first write");
     while(!Lock_for_write(reader->output_lock, 100)) {
+        if (*(reader->done)) {
+            Watchdog_notify_finished(reader->wdi);
+            return 0;
+        }
         Watchdog_notify_active(reader->wdi);
     }
 
