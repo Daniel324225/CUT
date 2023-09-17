@@ -70,7 +70,7 @@ int Analyzer_run(void* analyzer_v) {
         Watchdog_notify_active(analyzer->wdi);
         
         Logger_log(logger, "Analyzer: Trying to read");
-        if (Lock_for_read(input_lock, 100)) {
+        if (Lock_for_read(input_lock, 500)) {
             aggregate_stats(
                 input->cpu_stats, 
                 new, 
@@ -79,7 +79,7 @@ int Analyzer_run(void* analyzer_v) {
             Logger_log(logger, "Analyzer: Read done");
         }
         Logger_log(logger, "Analyzer: Trying to write");
-        if (Lock_for_write(output_lock, 100)) {
+        if (Lock_for_write(output_lock, 500)) {
             compute_usage(old, new, output->core_usage, core_count);
             Lock_unlock(analyzer->output_lock);
             swap(&old, &new);

@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "reader.h"
 #include "analyzer.h"
+#include "printer.h"
 
 static volatile sig_atomic_t done = 0;
 
@@ -16,9 +17,9 @@ int main(void) {
     signal(SIGTERM, signal_handler);
     signal(SIGINT, signal_handler);
 
-    const size_t threads = 3;
+    const size_t threads = 4;
     Watchdog wd;
-    Watchdog_init(&wd, &done, threads, (const char*[]){"Logger", "Reader", "Analyzer"});
+    Watchdog_init(&wd, &done, threads, (const char*[]){"Logger", "Reader", "Analyzer", "Printer"});
     
     Logger logger;
     Logger_init(&logger, "log.txt", 10, (WatchdogInterface){&wd, 0});
@@ -47,19 +48,23 @@ int main(void) {
         .output_lock = &analyzer_out_lock
     };
 
-    thrd_t logger_thread, wd_thread, reader_thread, analyzer_thread;
+    Printer printer = {
+        .wdi = {&wd, 3},
+        .logger = &logger,
+        .done = &done,
+        .input = &analyzer_out,
+        .input_lock = &analyzer_out_lock
+    };
+
+    thrd_t logger_thread, wd_thread, reader_thread, analyzer_thread, printer_thread;
     thrd_create(&logger_thread, Logger_run, &logger);
     thrd_create(&reader_thread, Reader_run, &reader);
     thrd_create(&analyzer_thread, Analyzer_run, &analyzer);
+    thrd_create(&printer_thread, Printer_run, &printer);
     thrd_create(&wd_thread, Watchdog_run, &wd);
 
     while(!done) {
         thrd_sleep(&(struct timespec){.tv_sec=1}, NULL);
-        if (!Lock_for_read(&analyzer_out_lock, 100)) continue;
-        printf("Cores %zd\n", analyzer_out.core_count);
-        for (size_t core_idx = 0; core_idx != analyzer_out.core_count; ++core_idx)
-            printf("Core %3zu usage: %6.2f%%\n", core_idx, (double)analyzer_out.core_usage[core_idx] * 100.0);
-        Lock_unlock(&analyzer_out_lock);
     }
 
     Logger_log(&logger, "Terminating");
@@ -80,6 +85,7 @@ int main(void) {
 
     thrd_join(reader_thread, NULL);
     thrd_join(analyzer_thread, NULL);
+    thrd_join(printer_thread, NULL);
     thrd_join(logger_thread, NULL);
     thrd_join(wd_thread, NULL);
     Logger_destroy(&logger);

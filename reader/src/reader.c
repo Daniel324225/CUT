@@ -34,7 +34,7 @@ int Reader_run(void* reader_v) {
     while (!*(reader->done)) {
         Watchdog_notify_active(reader->wdi);
         Logger_log(logger, "Reader: Waiting for write");
-        if (Lock_for_write(reader->output_lock, 100)) {
+        if (Lock_for_write(reader->output_lock, 500)) {
             get_cpu_stats(reader->output->cpu_stats, core_count);
             Lock_unlock(reader->output_lock);
             Logger_log(logger, "Reader: Write done");
