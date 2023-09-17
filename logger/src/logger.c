@@ -34,7 +34,9 @@ bool Logger_log_formatted(Logger* logger, const char* format, ...) {
     va_start(ap, format);
 
     char* msg;
-    vasprintf(&msg, format, ap);
+    if (vasprintf(&msg, format, ap) == -1) {
+        return false;
+    };
     return Logger_log_dynamic(logger, msg);
 }
 

@@ -13,7 +13,8 @@ int Printer_run(void* printer_v) {
         }
 
         const size_t core_count = printer->input->core_count;
-        system("clear");
+        int result = system("clear");
+        (void)result;
         for (size_t core_idx = 0; core_idx != core_count; ++core_idx){
             printf("Core %3zu usage: %6.2f%%\n", core_idx, (double)printer->input->core_usage[core_idx] * 100.0);
         }

@@ -88,7 +88,7 @@ static void get_cpu_stats(CpuStat cpu_stats[], size_t core_count) {
             break;
         }
         if (res == 1 && count == 3 && core_idx < core_count) {
-            fscanf(file, " %zu %zu %zu %zu %zu %zu %zu %zu",
+            res = fscanf(file, " %zu %zu %zu %zu %zu %zu %zu %zu",
                 &cpu_stats[core_idx].user,
                 &cpu_stats[core_idx].nice,
                 &cpu_stats[core_idx].system,
